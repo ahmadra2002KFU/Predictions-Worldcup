@@ -1,0 +1,11 @@
+# Caddy auto-provisions and renews a Let's Encrypt TLS certificate for SITE_DOMAIN
+# on first request, once DNS points the domain at this VPS. No cron/certbot needed.
+{$SITE_DOMAIN} {
+	reverse_proxy app:3000
+	encode gzip
+
+	# SSE (the /api/sse stream) is flushed immediately by Caddy — no extra config
+	# needed. This header is a defensive no-op that also helps if a buffering proxy
+	# is ever placed in front.
+	header /api/sse Cache-Control "no-cache, no-transform"
+}

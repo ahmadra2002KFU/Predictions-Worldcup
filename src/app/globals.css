@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: `dark:` variants + token overrides activate when <html> has .dark */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1d1521;
+  --surface: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --font-sans: var(--font-cairo), system-ui, sans-serif;
+
+  --color-brand-50: var(--brand-50, #fbf3fa);
+  --color-brand-100: var(--brand-100, #f6e2f5);
+  --color-brand-200: var(--brand-200, #ecc2e9);
+  --color-brand-300: var(--brand-300, #de93d6);
+  --color-brand-400: var(--brand-400, #cb5fbe);
+  --color-brand-500: var(--brand-500, #b33faa);
+  --color-brand-600: var(--brand-600, #a23b9d);
+  --color-brand-700: var(--brand-700, #872f82);
+  --color-brand-800: var(--brand-800, #6e2569);
+  --color-brand-900: var(--brand-900, #5a1f56);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/*
+ * Dark theme. The brand ramp is used two ways in the UI: the light end (50–200) as
+ * surfaces/borders and the dark end (700–900) as text. In dark mode those roles flip —
+ * the light tints become dark surfaces and the dark shades become light text — while the
+ * mid accents (500/600) stay saturated so buttons and highlights keep their punch.
+ */
+.dark {
+  --background: #14101a;
+  --foreground: #f3e6f2;
+  --surface: #211829;
+
+  --brand-50: #241a2d;
+  --brand-100: #30243a;
+  --brand-200: #402f4c;
+  --brand-300: #8a5a86;
+  --brand-400: #b556aa;
+  --brand-500: #c765bb;
+  --brand-600: #c258b4;
+  --brand-700: #e3a9db;
+  --brand-800: #efcaea;
+  --brand-900: #f6e7f4;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }

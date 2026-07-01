@@ -1,0 +1,17 @@
+# LOCAL DEVELOPMENT ONLY — auto-loaded by `docker compose` on your machine.
+# Do NOT copy this file to the VPS. On the server, only docker-compose.yml is used
+# (run `docker compose up -d --build`; if this file is present there, delete it or
+# run `docker compose -f docker-compose.yml up -d --build`).
+#
+# Purpose: expose Postgres to the host so `npm run dev` (running outside Docker)
+# can reach it, and expose the built app on :2026 for local full-stack testing
+# without Caddy/TLS. (The container still listens on 3000 internally; Caddy uses that
+# in production — only the host-side port is 2026 here.)
+services:
+  db:
+    ports:
+      - "5432:5432"
+
+  app:
+    ports:
+      - "2026:3000"

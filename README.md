@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# مفيد — توقعات كأس العالم (Mufeed World Cup Predictions)
 
-## Getting Started
+تطبيق ويب عربيّ أولاً لفاعلية توقّع مباريات كأس العالم: تسجيل بالاسم فقط (بدون كلمة مرور)،
+توقّع النتيجة + أفضل لاعب + صاحب أول هدف، لوحة صدارة لحظية، ودردشة لكل مباراة.
 
-First, run the development server:
+## التقنيات
+Next.js 16 · React 19 · PostgreSQL 17 + Prisma 7 · Tailwind v4 · iron-session · SSE · motion · flag-icons · Docker + Caddy.
+
+## التشغيل محلياً (Local development)
+
+المتطلبات: Node 22، Docker.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1) ثبّت الحزم
+npm install
+
+# 2) شغّل قاعدة البيانات فقط عبر Docker (ملف override يفتح المنفذ 5432 للمضيف)
+docker compose up -d db
+
+# 3) جهّز ملف البيئة (إن لم يوجد) وولّد أسراراً
+cp .env.example .env   # ثم عدّل DATABASE_URL ليشير إلى localhost و NODE_ENV=development
+
+# 4) طبّق الترحيلات وأدخل بيانات تجريبية
+npx prisma migrate dev
+npx prisma db seed
+
+# 5) شغّل خادم التطوير
+npm run dev            # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+لوحة الإدارة: `http://localhost:3000/admin` — كلمة المرور هي قيمة `ADMIN_SECRET` في `.env`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## الأوامر
+- `npm run dev` — خادم التطوير.
+- `npm run build` — بناء الإنتاج.
+- `npm test` — اختبارات محرّك النقاط (vitest).
+- `npm run lint` — فحص ESLint.
+- `npx prisma studio` — واجهة استعراض قاعدة البيانات.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## اختبار المكدّس الكامل محلياً (بدون Caddy)
+```bash
+docker compose up -d --build db migrate app   # التطبيق على http://localhost:3000
+```
 
-## Learn More
+## النشر على VPS
+راجع `Claude Docs/deployment.md` — نشر عبر `docker compose -f docker-compose.yml up -d --build` مع Caddy لشهادة TLS تلقائية.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## الوثائق
+- `Claude Docs/architecture.md` — نظرة معمارية وقواعد النقاط.
+- `Claude Docs/deployment.md` — دليل النشر والنسخ الاحتياطي.
+- `Claude Docs/plan.md` — حالة البناء والمراحل.

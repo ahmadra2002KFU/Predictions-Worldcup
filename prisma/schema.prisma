@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MatchStage {
+  GROUP
+  ROUND_OF_32
+  ROUND_OF_16
+  QUARTERFINAL
+  SEMIFINAL
+  THIRD_PLACE
+  FINAL
+}
+
+enum MatchStatus {
+  SCHEDULED
+  FINISHED
+  POSTPONED
+  CANCELLED
+}
+
+enum AuditAction {
+  REGISTER
+  RECOVER_ATTEMPT
+  RECOVER_SUCCESS
+  PREDICTION_CREATE
+  PREDICTION_UPDATE
+  ADMIN_LOGIN_SUCCESS
+  ADMIN_LOGIN_FAIL
+  ADMIN_TEAM_CREATE
+  ADMIN_TEAM_UPDATE
+  ADMIN_PLAYER_BULK_IMPORT
+  ADMIN_PLAYER_UPDATE
+  ADMIN_MATCH_CREATE
+  ADMIN_MATCH_UPDATE
+  ADMIN_RESULT_ENTERED
+  ADMIN_BONUS_AWARDED
+  ADMIN_PARTICIPANT_RENAME
+}
+
+model Participant {
+  id          String   @id @default(cuid())
+  displayName String
+  email       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sessions     Session[]
+  predictions  Prediction[]
+  chatMessages ChatMessage[]
+  auditLogs    AuditLog[]
+
+  @@index([email])
+  @@index([displayName])
+}
+
+model Session {
+  id            String      @id @default(cuid())
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  lastSeenAt    DateTime    @default(now())
+  ip            String?
+  userAgent     String?
+  revokedAt     DateTime?
+
+  @@index([participantId])
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  name      String
+  nameEn    String?
+  flagEmoji String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  players             Player[]
+  homeMatches         Match[]  @relation("HomeTeam")
+  awayMatches         Match[]  @relation("AwayTeam")
+  penaltyWinnerMatches Match[] @relation("PenaltyWinner")
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Restrict)
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([teamId, name])
+  @@index([teamId])
+}
+
+model Match {
+  id                 String      @id @default(cuid())
+  stage              MatchStage
+  // Teams are nullable: knockout matches beyond the current round start "TBD" and
+  // are filled by the winner of a source match (see homeSourceMatch/awaySourceMatch).
+  homeTeamId         String?
+  homeTeam           Team?       @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeamId         String?
+  awayTeam           Team?       @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  kickoffAt          DateTime
+  venue              String
+  status             MatchStatus @default(SCHEDULED)
+  excludeFromScoring Boolean     @default(false)
+
+  // Bracket wiring: the winner of homeSourceMatch fills the home slot (and away likewise).
+  // slot labels are shown while the slot is still TBD (e.g. "الفائز من: إسبانيا × النمسا").
+  homeSourceMatchId String?
+  homeSourceMatch   Match?  @relation("HomeSource", fields: [homeSourceMatchId], references: [id], onDelete: SetNull)
+  awaySourceMatchId String?
+  awaySourceMatch   Match?  @relation("AwaySource", fields: [awaySourceMatchId], references: [id], onDelete: SetNull)
+  homeSlotLabel     String?
+  awaySlotLabel     String?
+  feedsHome         Match[] @relation("HomeSource")
+  feedsAway         Match[] @relation("AwaySource")
+
+  // Goals at 90 min, or 120 min if extra time was played. Never includes penalty kicks.
+  homeScore Int?
+  awayScore Int?
+
+  wentToPenalties      Boolean   @default(false)
+  penaltyWinnerTeamId  String?
+  penaltyWinnerTeam    Team?     @relation("PenaltyWinner", fields: [penaltyWinnerTeamId], references: [id])
+
+  // Actual best player / first scorer, recorded by the admin as free text (for display
+  // and as a reference while awarding the per-prediction bonus points below).
+  bestPlayerName  String?
+  firstScorerName String?
+  resultEnteredAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  predictions  Prediction[]
+  chatMessages ChatMessage[]
+
+  @@index([kickoffAt])
+  @@index([stage])
+}
+
+model Prediction {
+  id            String      @id @default(cuid())
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  matchId       String
+  match         Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  predHomeScore     Int
+  predAwayScore     Int
+  // Free-text guesses typed by the participant (not tied to a roster).
+  predBestPlayerName  String?
+  predFirstScorerName String?
+
+  pointsScoreOutcome Int @default(0)
+  // Bonus points (+1 each) awarded manually by the admin, one prediction at a time.
+  pointsBestPlayer   Int @default(0)
+  pointsFirstScorer  Int @default(0)
+  pointsTotal        Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([participantId, matchId])
+  @@index([matchId])
+  @@index([participantId])
+}
+
+model ChatMessage {
+  id            String      @id @default(cuid())
+  matchId       String
+  match         Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  body          String
+  createdAt     DateTime    @default(now())
+  deletedAt     DateTime?
+
+  @@index([matchId, createdAt])
+}
+
+model AuditLog {
+  id            String       @id @default(cuid())
+  action        AuditAction
+  participantId String?
+  participant   Participant? @relation(fields: [participantId], references: [id], onDelete: SetNull)
+  ip            String?
+  userAgent     String?
+  metadata      Json?
+  createdAt     DateTime     @default(now())
+
+  @@index([participantId])
+  @@index([ip])
+  @@index([action])
+  @@index([createdAt])
+}
