@@ -45,6 +45,14 @@ export default function RulesPage() {
       </section>
 
       <section className="mt-8 space-y-3">
+        <h2 className="text-lg font-semibold text-brand-900">شروط المشاركة</h2>
+        <ul className="list-inside list-disc space-y-2 text-brand-900/80">
+          <li>صاحب أقل نقاط يحضر القهوة لصاحب أعلى نقاط.</li>
+          <li>بمجرد مشاركتك في توقع واحد، لا يمكنك الانسحاب.</li>
+        </ul>
+      </section>
+
+      <section className="mt-8 space-y-3">
         <h2 className="text-lg font-semibold text-brand-900">الخصوصية وكشف الغش</h2>
         <p className="text-brand-900/80">
           نظراً لعدم وجود كلمات مرور، يتم حفظ سجل بعنوان IP والمتصفح والوقت عند التسجيل وعند كل

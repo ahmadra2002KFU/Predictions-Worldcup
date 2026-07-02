@@ -1,0 +1,6 @@
+# Local/public sidecar deployment for this host: expose only the Next.js app on localhost:2026.
+# Use with: docker compose -f docker-compose.yml -f docker-compose.localhost2026.yml up -d --build db migrate app
+services:
+  app:
+    ports:
+      - "127.0.0.1:2026:3000"

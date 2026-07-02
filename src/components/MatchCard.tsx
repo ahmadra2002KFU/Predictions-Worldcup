@@ -223,15 +223,18 @@ export function MatchCard({
 }: MatchCardProps) {
   const reduce = useReducedMotion();
   const finished = status === "FINISHED";
+  const cardClassName = finished
+    ? "overflow-hidden rounded-2xl border border-slate-200 bg-slate-100/80 shadow-sm grayscale transition-[border-color,box-shadow,filter] duration-200 hover:border-slate-300 hover:shadow-md dark:border-brand-200 dark:bg-brand-50/80 dark:grayscale-0"
+    : "overflow-hidden rounded-2xl border border-brand-200/60 bg-surface shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-brand-300 hover:shadow-md";
 
   return (
     <motion.div
       initial={reduce ? false : { opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: finished ? 0.72 : 1, y: 0 }}
       transition={{ duration: 0.35, delay: reduce ? 0 : index * 0.05, ease: "easeOut" }}
       whileHover={reduce ? undefined : { y: -3 }}
       whileTap={reduce ? undefined : { scale: 0.99 }}
-      className="overflow-hidden rounded-2xl border border-brand-200/60 bg-surface shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-brand-300 hover:shadow-md"
+      className={cardClassName}
     >
       <Link href={`/matches/${id}`} className="group block p-4">
         <div className="mb-3 flex items-center justify-between">
