@@ -18,6 +18,26 @@ function pred(predHomeScore: number, predAwayScore: number, extra: Partial<Predi
   };
 }
 
+function referenceNormalScorePoints(resultHome: number, resultAway: number, predHome: number, predAway: number): number {
+  const actual = outcomeOf(resultHome, resultAway);
+  const predicted = outcomeOf(predHome, predAway);
+
+  if (predicted !== actual) return 0;
+  if (predHome === resultHome && predAway === resultAway) return 3;
+  if (actual === "DRAW") return 2;
+
+  const totalScorelineMiss = Math.abs(predHome - resultHome) + Math.abs(predAway - resultAway);
+  return totalScorelineMiss === 1 ? 2 : 1;
+}
+
+function referencePenaltyScorePoints(penaltyWinnerIsHome: boolean, predHome: number, predAway: number): number {
+  const predicted = outcomeOf(predHome, predAway);
+  const advancing = penaltyWinnerIsHome ? "HOME_WIN" : "AWAY_WIN";
+  if (predicted === advancing) return 2;
+  if (predicted === "DRAW") return 1;
+  return 0;
+}
+
 describe("outcomeOf", () => {
   it("detects home win, away win, draw", () => {
     expect(outcomeOf(2, 1)).toBe("HOME_WIN");
@@ -72,6 +92,20 @@ describe("scoreOutcomePoints — normal (non-penalty) matches", () => {
     expect(scoreOutcomePoints(result(0, 4), pred(0, 3))).toBe(2); // one-goal scoreline miss
     expect(scoreOutcomePoints(result(0, 4), pred(0, 10))).toBe(1); // margin diff 6
   });
+
+  it("matches the independent scoring table for every 0-6 normal-time score and prediction", () => {
+    for (let resultHome = 0; resultHome <= 6; resultHome += 1) {
+      for (let resultAway = 0; resultAway <= 6; resultAway += 1) {
+        for (let predHome = 0; predHome <= 6; predHome += 1) {
+          for (let predAway = 0; predAway <= 6; predAway += 1) {
+            expect(scoreOutcomePoints(result(resultHome, resultAway), pred(predHome, predAway))).toBe(
+              referenceNormalScorePoints(resultHome, resultAway, predHome, predAway)
+            );
+          }
+        }
+      }
+    }
+  });
 });
 
 describe("scoreOutcomePoints — knockout matches decided by penalties", () => {
@@ -99,6 +133,35 @@ describe("scoreOutcomePoints — knockout matches decided by penalties", () => {
   it("exact score prediction does NOT get the normal 3-point treatment in penalty mode", () => {
     // Actual 120-min score is 1-1; predicting 1-1 exactly is scored as "predicted a draw" = 1, not 3.
     expect(scoreOutcomePoints(penaltyResult(true), pred(1, 1))).toBe(1);
+  });
+
+  it("requires a penalty winner when penalty mode is used", () => {
+    expect(() => scoreOutcomePoints(result(1, 1, { wentToPenalties: true }), pred(2, 1))).toThrow(
+      "penalty_winner_required"
+    );
+  });
+
+  it("requires the stored scoreline to be tied in penalty mode", () => {
+    expect(() => scoreOutcomePoints(result(2, 1, { wentToPenalties: true, penaltyWinnerIsHome: true }), pred(2, 1))).toThrow(
+      "penalty_result_must_have_tied_scoreline"
+    );
+  });
+
+  it("matches the independent penalty scoring table for every tied 0-6 result and prediction", () => {
+    for (const penaltyWinnerIsHome of [true, false]) {
+      for (let tiedScore = 0; tiedScore <= 6; tiedScore += 1) {
+        for (let predHome = 0; predHome <= 6; predHome += 1) {
+          for (let predAway = 0; predAway <= 6; predAway += 1) {
+            expect(
+              scoreOutcomePoints(
+                result(tiedScore, tiedScore, { wentToPenalties: true, penaltyWinnerIsHome }),
+                pred(predHome, predAway)
+              )
+            ).toBe(referencePenaltyScorePoints(penaltyWinnerIsHome, predHome, predAway));
+          }
+        }
+      }
+    }
   });
 });
 

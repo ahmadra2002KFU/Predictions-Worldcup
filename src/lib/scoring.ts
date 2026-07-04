@@ -39,8 +39,15 @@ export function scoreOutcomePoints(result: MatchResult, pred: PredictionInput): 
   const predicted = outcomeOf(pred.predHomeScore, pred.predAwayScore);
 
   if (result.wentToPenalties) {
-    // actual is always DRAW here (tied through 120 min). Knockout matches MUST produce
+    // Actual is always DRAW here (tied through 120 min). Knockout matches MUST produce
     // a winner, so score against who actually advanced, not the tied scoreline.
+    if (result.homeScore !== result.awayScore) {
+      throw new Error("penalty_result_must_have_tied_scoreline");
+    }
+    if (typeof result.penaltyWinnerIsHome !== "boolean") {
+      throw new Error("penalty_winner_required");
+    }
+
     const advancing: Outcome = result.penaltyWinnerIsHome ? "HOME_WIN" : "AWAY_WIN";
     if (predicted === advancing) return 2; // correctly called who advances
     if (predicted === "DRAW") return 1; // correctly read it as level, didn't call the winner

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start -p 2026",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "verify:scoring": "tsx scripts/verify-scoring-exhaustive.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
