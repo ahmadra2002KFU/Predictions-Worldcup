@@ -35,7 +35,11 @@ services:
       ADMIN_SECRET: ${ADMIN_SECRET}
       SESSION_SECRET: ${SESSION_SECRET}
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      AI_COMMENTARY_BASE_URL: http://host.docker.internal:8084/v1
+      AI_COMMENTARY_MODEL: Qwen3.6-27B-Q4_K_M-mtp.gguf
       TZ: UTC
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       migrate: { condition: service_completed_successfully }
       db: { condition: service_healthy }

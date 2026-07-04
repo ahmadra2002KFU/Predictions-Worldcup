@@ -44,6 +44,11 @@ export function RegisterForm() {
       return;
     }
 
+    if (!email.trim()) {
+      setError("البريد الإلكتروني مطلوب لحفظ حسابك ونقاطك");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/register", {
@@ -55,6 +60,7 @@ export function RegisterForm() {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         if (res.status === 429) setError("محاولات كثيرة جداً، حاول لاحقاً");
+        else if (res.status === 409 || data.error === "email_taken") setError("هذا البريد مسجل مسبقاً — استخدم استعادة الحساب");
         else if (data.issues?.[0]?.message) setError(data.issues[0].message);
         else setError("حدث خطأ، حاول مرة أخرى");
         return;
@@ -91,16 +97,20 @@ export function RegisterForm() {
 
       <div>
         <label htmlFor="email" className="mb-1 block text-sm font-medium text-brand-900">
-          البريد الإلكتروني (اختياري، لاستعادة حسابك لاحقاً)
+          البريد الإلكتروني
         </label>
         <input
           id="email"
           type="email"
+          required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full rounded-lg border border-brand-200 px-4 py-2.5 text-brand-900 outline-none focus:border-brand-500"
           placeholder="example@email.com"
         />
+        <p className="mt-1 text-xs text-brand-900/50">
+          سيتم ربط حسابك ونتائجك بهذا البريد حتى لا تفقد الوصول إليها.
+        </p>
       </div>
 
       <label className="flex items-start gap-2 text-sm text-brand-900/80">
@@ -123,7 +133,7 @@ export function RegisterForm() {
 
       <button
         type="submit"
-        disabled={submitting || !displayName.trim() || !agreedToRules}
+        disabled={submitting || !displayName.trim() || !email.trim() || !agreedToRules}
         className="w-full rounded-lg bg-brand-600 px-4 py-2.5 font-semibold text-white transition-colors hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? "جارٍ التسجيل..." : "تسجيل"}

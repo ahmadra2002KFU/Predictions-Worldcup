@@ -5,10 +5,11 @@ import { getCurrentParticipant } from "@/lib/session";
 import { PredictionForm } from "@/components/PredictionForm";
 import { ChatPanel } from "@/components/ChatPanel";
 import { TeamFlag } from "@/components/TeamFlag";
-import { MatchPredictionsList } from "@/components/MatchPredictionsList";
+import { MatchPredictionsList, type BestPredictionRow } from "@/components/MatchPredictionsList";
 import { formatKickoff } from "@/lib/format";
 import { isLocked } from "@/lib/matchLock";
 import { STAGE_LABELS, STATUS_LABELS } from "@/lib/labels";
+import { getBestPredictions } from "@/lib/bestPredictions";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +72,26 @@ export default async function MatchDetailPage({
         },
         orderBy: [{ pointsTotal: "desc" }, { createdAt: "asc" }],
       })
+    : [];
+
+  const predictionRows = allPredictions.map((p) => ({
+    id: p.id,
+    displayName: p.participant.displayName,
+    predHomeScore: p.predHomeScore,
+    predAwayScore: p.predAwayScore,
+    predBestPlayerName: p.predBestPlayerName,
+    predFirstScorerName: p.predFirstScorerName,
+    pointsTotal: p.pointsTotal,
+    createdAt: p.createdAt,
+    isMine: participant?.id === p.participantId,
+  }));
+  const bestPredictions: BestPredictionRow[] = finished
+    ? getBestPredictions(
+        predictionRows.map((p) => ({
+          ...p,
+          rankLabel: "🏆",
+        }))
+      )
     : [];
 
   return (
@@ -156,15 +177,16 @@ export default async function MatchDetailPage({
           finished={finished}
           homeTeamName={match.homeTeam?.name ?? "المضيف"}
           awayTeamName={match.awayTeam?.name ?? "الضيف"}
-          predictions={allPredictions.map((p) => ({
+          bestPredictions={bestPredictions}
+          predictions={predictionRows.map((p) => ({
             id: p.id,
-            displayName: p.participant.displayName,
+            displayName: p.displayName,
             predHomeScore: p.predHomeScore,
             predAwayScore: p.predAwayScore,
             predBestPlayerName: p.predBestPlayerName,
             predFirstScorerName: p.predFirstScorerName,
             pointsTotal: p.pointsTotal,
-            isMine: participant?.id === p.participantId,
+            isMine: p.isMine,
           }))}
         />
       )}

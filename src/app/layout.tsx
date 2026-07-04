@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cairo } from "next/font/google";
 import "flag-icons/css/flag-icons.min.css";
 import "./globals.css";
 import { RealtimeProvider } from "@/hooks/useRealtimeBus";
 import { SiteHeader } from "@/components/SiteHeader";
+import { AddToHomePrompt } from "@/components/AddToHomePrompt";
 
 const cairo = Cairo({
   variable: "--font-cairo",
@@ -14,6 +15,16 @@ const cairo = Cairo({
 export const metadata: Metadata = {
   title: "مفيد | توقعات كأس العالم",
   description: "توقع نتائج مباريات كأس العالم مع مفيد وتنافس في لوحة الصدارة",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "توقعات مفيد",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#a23b9d",
 };
 
 export default function RootLayout({
@@ -36,6 +47,7 @@ export default function RootLayout({
         <RealtimeProvider>
           <SiteHeader />
           {children}
+          <AddToHomePrompt />
         </RealtimeProvider>
       </body>
     </html>

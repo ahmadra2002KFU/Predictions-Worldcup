@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { MatchNotifications } from "@/components/MatchNotifications";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -23,6 +24,7 @@ export function SiteHeader() {
           <Link href="/leaderboard" className="text-brand-900/70 transition-colors hover:text-brand-700">
             الصدارة
           </Link>
+          <MatchNotifications />
           <ThemeToggle />
         </div>
       </nav>

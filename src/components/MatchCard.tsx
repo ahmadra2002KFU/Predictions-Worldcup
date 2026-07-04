@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { TeamFlag } from "@/components/TeamFlag";
 import { useMatchLock } from "@/components/ui/Countdown";
+import { EditCountdown } from "@/components/EditCountdown";
 import { formatKickoff } from "@/lib/format";
 import type { LockableStatus } from "@/lib/matchLock";
 
@@ -23,6 +24,10 @@ export interface PredictionPreview {
   isMine: boolean;
 }
 
+export interface BestPredictionPreview extends PredictionPreview {
+  rankLabel: string;
+}
+
 interface MatchCardProps {
   id: string;
   homeTeam: Team | null;
@@ -36,10 +41,14 @@ interface MatchCardProps {
   index?: number;
   /** Predictions the current viewer is allowed to see (own always; others after lock; admin sees all). */
   predictions?: PredictionPreview[];
+  /** Top positive-point predictions for a finished match. */
+  bestPredictions?: BestPredictionPreview[];
   /** Count of others' predictions still hidden (regular viewer, before lock) — shown as a hint only. */
   hiddenPredictionCount?: number;
   /** True when the viewer is the admin (used to label predictions shown before lock). */
   isAdminView?: boolean;
+  /** True when the current viewer has already submitted a prediction for this match. */
+  hasMyPrediction?: boolean;
 }
 
 function StatusBadge({ kickoffAt, status }: { kickoffAt: Date; status: LockableStatus }) {
@@ -137,11 +146,13 @@ function Side({
 
 function PredictionsPanel({
   predictions,
+  bestPredictions,
   hiddenCount,
   finished,
   isAdminView,
 }: {
   predictions: PredictionPreview[];
+  bestPredictions: BestPredictionPreview[];
   hiddenCount: number;
   finished: boolean;
   isAdminView: boolean;
@@ -160,6 +171,31 @@ function PredictionsPanel({
           </span>
         )}
       </div>
+
+      {finished && bestPredictions.length > 0 && (
+        <div className="mb-3 rounded-xl border border-emerald-100 bg-emerald-50/80 p-3 text-emerald-950">
+          <div className="mb-2 flex items-center gap-2 text-[11px] font-bold text-emerald-800">
+            <span aria-hidden="true">🏆</span>
+            <span>أفضل التوقعات</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {bestPredictions.map((p) => (
+              <span
+                key={p.id}
+                className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[11px] font-semibold shadow-sm ring-1 ring-emerald-100"
+                title={`${p.displayName}: ${p.predHomeScore}-${p.predAwayScore} · ${p.pointsTotal} نقطة`}
+              >
+                <span>{p.rankLabel}</span>
+                <span className="max-w-24 truncate">{p.displayName}</span>
+                <span dir="ltr" className="tabular-nums text-emerald-700">
+                  {p.predHomeScore}-{p.predAwayScore}
+                </span>
+                <span className="text-emerald-700">+{p.pointsTotal}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {predictions.length > 0 && (
         <div className="max-h-44 space-y-1.5 overflow-y-auto pe-1">
@@ -218,8 +254,10 @@ export function MatchCard({
   awayScore,
   index = 0,
   predictions = [],
+  bestPredictions = [],
   hiddenPredictionCount = 0,
   isAdminView = false,
+  hasMyPrediction = false,
 }: MatchCardProps) {
   const reduce = useReducedMotion();
   const finished = status === "FINISHED";
@@ -241,6 +279,21 @@ export function MatchCard({
           <span className="text-xs text-brand-900/50">{formatKickoff(kickoffAt)}</span>
           <StatusBadge kickoffAt={kickoffAt} status={status} />
         </div>
+
+        {status === "SCHEDULED" && (
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-[11px] font-medium">
+            <EditCountdown kickoffAt={kickoffAt} status={status} />
+            <span
+              className={
+                hasMyPrediction
+                  ? "rounded-full bg-green-50 px-2.5 py-1 text-green-700"
+                  : "rounded-full bg-amber-50 px-2.5 py-1 text-amber-700"
+              }
+            >
+              {hasMyPrediction ? "توقعت" : "لم تتوقع بعد"}
+            </span>
+          </div>
+        )}
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <Side team={homeTeam} slotLabel={homeSlotLabel} align="start" />
@@ -266,6 +319,7 @@ export function MatchCard({
 
       <PredictionsPanel
         predictions={predictions}
+        bestPredictions={bestPredictions}
         hiddenCount={hiddenPredictionCount}
         finished={finished}
         isAdminView={isAdminView}

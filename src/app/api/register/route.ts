@@ -30,8 +30,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
 
+  const existingEmail = await prisma.participant.findFirst({
+    where: { email: { equals: email, mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (existingEmail) {
+    return NextResponse.json({ error: "email_taken" }, { status: 409 });
+  }
+
   const participant = await prisma.participant.create({
-    data: { displayName, email: email || null },
+    data: { displayName, email },
   });
 
   const dbSession = await prisma.session.create({

@@ -2,7 +2,12 @@ import * as z from "zod";
 
 export const registerSchema = z.object({
   displayName: z.string().trim().min(1, "الاسم مطلوب").max(60, "الاسم طويل جداً"),
-  email: z.union([z.email("بريد إلكتروني غير صحيح"), z.literal("")]).optional(),
+  email: z
+    .string({ error: "البريد الإلكتروني مطلوب" })
+    .trim()
+    .min(1, "البريد الإلكتروني مطلوب")
+    .pipe(z.email("بريد إلكتروني غير صحيح"))
+    .transform((email) => email.toLowerCase()),
   agreedToRules: z.literal(true, { error: "يجب الموافقة على القوانين" }),
 });
 

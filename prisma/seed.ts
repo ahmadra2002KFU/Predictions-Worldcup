@@ -186,24 +186,24 @@ interface KnockoutDef {
 
 // Round of 16 — each fed by two R32 winners (verified pairings).
 const R16: KnockoutDef[] = [
-  { code: "R16-F", stage: "ROUND_OF_16", kickoff: "2026-07-04T18:00:00Z", venue: "ملعب NRG، هيوستن", homeSource: codeR32("ZA", "CA"), awaySource: codeR32("BR", "JP") },
-  { code: "R16-G", stage: "ROUND_OF_16", kickoff: "2026-07-04T22:00:00Z", venue: "ملعب جيليت، بوسطن", homeSource: codeR32("DE", "PY"), awaySource: codeR32("NL", "MA") },
-  { code: "R16-H", stage: "ROUND_OF_16", kickoff: "2026-07-05T18:00:00Z", venue: "ملعب ميت لايف، نيوجيرسي", homeSource: codeR32("CI", "NO"), awaySource: codeR32("FR", "SE") },
-  { code: "R16-A", stage: "ROUND_OF_16", kickoff: "2026-07-05T22:00:00Z", venue: "ملعب الأزتيكا، مكسيكو سيتي", homeSource: codeR32("MX", "EC"), awaySource: codeR32("ENG", "CD") },
-  { code: "R16-B", stage: "ROUND_OF_16", kickoff: "2026-07-06T18:00:00Z", venue: "ملعب لومن فيلد، سياتل", homeSource: codeR32("BE", "SN"), awaySource: codeR32("US", "BA") },
-  { code: "R16-C", stage: "ROUND_OF_16", kickoff: "2026-07-06T22:00:00Z", venue: "ملعب سوفاي، لوس أنجلوس", homeSource: codeR32("ES", "AT"), awaySource: codeR32("CH", "DZ") },
-  { code: "R16-D", stage: "ROUND_OF_16", kickoff: "2026-07-07T18:00:00Z", venue: "ملعب BMO، تورنتو", homeSource: codeR32("PT", "HR"), awaySource: codeR32("AU", "EG") },
-  { code: "R16-E", stage: "ROUND_OF_16", kickoff: "2026-07-07T22:00:00Z", venue: "ملعب هارد روك، ميامي", homeSource: codeR32("AR", "CV"), awaySource: codeR32("CO", "GH") },
+  { code: "R16-F", stage: "ROUND_OF_16", kickoff: "2026-07-04T17:00:00Z", venue: "ملعب NRG، هيوستن", homeSource: codeR32("ZA", "CA"), awaySource: codeR32("NL", "MA") },
+  { code: "R16-G", stage: "ROUND_OF_16", kickoff: "2026-07-04T21:00:00Z", venue: "ملعب لينكولن فايننشال فيلد، فيلادلفيا", homeSource: codeR32("DE", "PY"), awaySource: codeR32("FR", "SE") },
+  { code: "R16-H", stage: "ROUND_OF_16", kickoff: "2026-07-05T20:00:00Z", venue: "ملعب ميت لايف، نيوجيرسي", homeSource: codeR32("BR", "JP"), awaySource: codeR32("CI", "NO") },
+  { code: "R16-A", stage: "ROUND_OF_16", kickoff: "2026-07-06T00:00:00Z", venue: "ملعب الأزتيكا، مكسيكو سيتي", homeSource: codeR32("MX", "EC"), awaySource: codeR32("ENG", "CD") },
+  { code: "R16-B", stage: "ROUND_OF_16", kickoff: "2026-07-06T19:00:00Z", venue: "ملعب AT&T، دالاس", homeSource: codeR32("PT", "HR"), awaySource: codeR32("ES", "AT") },
+  { code: "R16-C", stage: "ROUND_OF_16", kickoff: "2026-07-06T21:00:00Z", venue: "ملعب لومن فيلد، سياتل", homeSource: codeR32("US", "BA"), awaySource: codeR32("BE", "SN") },
+  { code: "R16-D", stage: "ROUND_OF_16", kickoff: "2026-07-07T16:00:00Z", venue: "ملعب مرسيدس-بنز، أتلانتا", homeSource: codeR32("AR", "CV"), awaySource: codeR32("AU", "EG") },
+  { code: "R16-E", stage: "ROUND_OF_16", kickoff: "2026-07-07T20:00:00Z", venue: "ملعب BC بليس، فانكوفر", homeSource: codeR32("CH", "DZ"), awaySource: codeR32("CO", "GH") },
 ];
 
 // Quarterfinals, Semifinals, Final (standard bracket path).
 const LATER: KnockoutDef[] = [
-  { code: "QF1", stage: "QUARTERFINAL", kickoff: "2026-07-09T22:00:00Z", venue: "ملعب هارد روك، ميامي", homeSource: "R16-A", awaySource: "R16-E" },
-  { code: "QF2", stage: "QUARTERFINAL", kickoff: "2026-07-10T22:00:00Z", venue: "ملعب مرسيدس-بنز، أتلانتا", homeSource: "R16-B", awaySource: "R16-D" },
-  { code: "QF3", stage: "QUARTERFINAL", kickoff: "2026-07-11T18:00:00Z", venue: "ملعب سوفاي، لوس أنجلوس", homeSource: "R16-C", awaySource: "R16-H" },
-  { code: "QF4", stage: "QUARTERFINAL", kickoff: "2026-07-11T22:00:00Z", venue: "ملعب ميت لايف، نيوجيرسي", homeSource: "R16-G", awaySource: "R16-F" },
-  { code: "SF1", stage: "SEMIFINAL", kickoff: "2026-07-14T22:00:00Z", venue: "ملعب AT&T، دالاس", homeSource: "QF1", awaySource: "QF2" },
-  { code: "SF2", stage: "SEMIFINAL", kickoff: "2026-07-15T22:00:00Z", venue: "ملعب مرسيدس-بنز، أتلانتا", homeSource: "QF3", awaySource: "QF4" },
+  { code: "QF1", stage: "QUARTERFINAL", kickoff: "2026-07-09T20:00:00Z", venue: "ملعب جيليت، بوسطن", homeSource: "R16-G", awaySource: "R16-F" },
+  { code: "QF2", stage: "QUARTERFINAL", kickoff: "2026-07-10T19:00:00Z", venue: "ملعب سوفاي، لوس أنجلوس", homeSource: "R16-B", awaySource: "R16-C" },
+  { code: "QF3", stage: "QUARTERFINAL", kickoff: "2026-07-11T21:00:00Z", venue: "ملعب هارد روك، ميامي", homeSource: "R16-H", awaySource: "R16-A" },
+  { code: "QF4", stage: "QUARTERFINAL", kickoff: "2026-07-12T01:00:00Z", venue: "ملعب آروهيد، كانساس سيتي", homeSource: "R16-D", awaySource: "R16-E" },
+  { code: "SF1", stage: "SEMIFINAL", kickoff: "2026-07-14T19:00:00Z", venue: "ملعب AT&T، دالاس", homeSource: "QF1", awaySource: "QF2" },
+  { code: "SF2", stage: "SEMIFINAL", kickoff: "2026-07-15T19:00:00Z", venue: "ملعب مرسيدس-بنز، أتلانتا", homeSource: "QF3", awaySource: "QF4" },
   { code: "FINAL", stage: "FINAL", kickoff: "2026-07-19T19:00:00Z", venue: "ملعب ميت لايف، نيوجيرسي", homeSource: "SF1", awaySource: "SF2" },
 ];
 

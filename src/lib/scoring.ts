@@ -52,10 +52,10 @@ export function scoreOutcomePoints(result: MatchResult, pred: PredictionInput): 
   if (pred.predHomeScore === result.homeScore && pred.predAwayScore === result.awayScore) return 3;
   if (actual === "DRAW") return 2; // correct draw direction, wrong exact score
 
-  const actualMargin = Math.abs(result.homeScore - result.awayScore);
-  const predictedMargin = Math.abs(pred.predHomeScore - pred.predAwayScore);
-  const marginDiff = Math.abs(actualMargin - predictedMargin);
-  return marginDiff === 1 ? 2 : 1; // ONLY exactly-one-goal-off gets 2; everything else gets 1
+  const homeScoreDiff = Math.abs(pred.predHomeScore - result.homeScore);
+  const awayScoreDiff = Math.abs(pred.predAwayScore - result.awayScore);
+  const totalScorelineDiff = homeScoreDiff + awayScoreDiff;
+  return totalScorelineDiff === 1 ? 2 : 1; // Only a one-goal scoreline miss gets 2; broader misses get 1
 }
 
 export interface PointsBreakdown {

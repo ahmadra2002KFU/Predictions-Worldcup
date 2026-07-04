@@ -31,7 +31,7 @@ describe("scoreOutcomePoints — normal (non-penalty) matches", () => {
     expect(scoreOutcomePoints(result(4, 0), pred(4, 0))).toBe(3);
   });
 
-  it("off by exactly one goal margin = 2 points (user example: 4-0 actual, 3-0 predicted)", () => {
+  it("one-goal scoreline miss with the correct winner = 2 points (user example: 4-0 actual, 3-0 predicted)", () => {
     expect(scoreOutcomePoints(result(4, 0), pred(3, 0))).toBe(2);
   });
 
@@ -51,8 +51,12 @@ describe("scoreOutcomePoints — normal (non-penalty) matches", () => {
     expect(scoreOutcomePoints(result(3, 1), pred(4, 2))).toBe(1);
   });
 
-  it("minimal decisive off-by-one still = 2 points (1-0 actual, 2-0 predicted)", () => {
+  it("minimal decisive one-goal scoreline miss still = 2 points (1-0 actual, 2-0 predicted)", () => {
     expect(scoreOutcomePoints(result(1, 0), pred(2, 0))).toBe(2);
+  });
+
+  it("correct winner but multiple scoreline misses = 1 point (Argentina 3-2, predicted 2-0)", () => {
+    expect(scoreOutcomePoints(result(3, 2), pred(2, 0))).toBe(1);
   });
 
   it("exact 0-0 = 3 points", () => {
@@ -65,7 +69,7 @@ describe("scoreOutcomePoints — normal (non-penalty) matches", () => {
 
   it("away win variants score symmetrically to home win", () => {
     expect(scoreOutcomePoints(result(0, 4), pred(0, 4))).toBe(3); // exact
-    expect(scoreOutcomePoints(result(0, 4), pred(0, 3))).toBe(2); // margin diff 1
+    expect(scoreOutcomePoints(result(0, 4), pred(0, 3))).toBe(2); // one-goal scoreline miss
     expect(scoreOutcomePoints(result(0, 4), pred(0, 10))).toBe(1); // margin diff 6
   });
 });

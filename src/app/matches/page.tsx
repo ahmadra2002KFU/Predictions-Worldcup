@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/db";
-import { MatchCard, type PredictionPreview } from "@/components/MatchCard";
+import { MatchCard, type BestPredictionPreview, type PredictionPreview } from "@/components/MatchCard";
 import { STAGE_LABELS } from "@/lib/labels";
 import { isLocked } from "@/lib/matchLock";
 import { getCurrentParticipant } from "@/lib/session";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
+import { getBestPredictions } from "@/lib/bestPredictions";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +43,15 @@ function MatchSection({
 }: {
   title: string;
   matches: MatchWithRelations[];
-  cardData: Map<string, { predictions: PredictionPreview[]; hiddenPredictionCount: number }>;
+  cardData: Map<
+    string,
+    {
+      predictions: PredictionPreview[];
+      bestPredictions: BestPredictionPreview[];
+      hiddenPredictionCount: number;
+      hasMyPrediction: boolean;
+    }
+  >;
   isAdmin: boolean;
   defaultOpen?: boolean;
 }) {
@@ -67,8 +76,10 @@ function MatchSection({
                 awayScore={match.awayScore}
                 index={index}
                 predictions={cardData.get(match.id)?.predictions}
+                bestPredictions={cardData.get(match.id)?.bestPredictions}
                 hiddenPredictionCount={cardData.get(match.id)?.hiddenPredictionCount}
                 isAdminView={isAdmin}
+                hasMyPrediction={cardData.get(match.id)?.hasMyPrediction}
               />
             ))}
           </div>
@@ -120,14 +131,21 @@ export default async function MatchesPage() {
   // match locks (anti-copy). The admin sees every guess at all times.
   const cardData = new Map<
     string,
-    { predictions: PredictionPreview[]; hiddenPredictionCount: number }
+    {
+      predictions: PredictionPreview[];
+      bestPredictions: BestPredictionPreview[];
+      hiddenPredictionCount: number;
+      hasMyPrediction: boolean;
+    }
   >();
   for (const match of matches) {
     const locked = isLocked(match.kickoffAt, match.status);
     const visible: PredictionPreview[] = [];
     let hidden = 0;
+    let hasMyPrediction = false;
     for (const p of match.predictions) {
       const isMine = participant?.id === p.participantId;
+      if (isMine) hasMyPrediction = true;
       if (isAdmin || locked || isMine) {
         visible.push({
           id: p.id,
@@ -143,7 +161,24 @@ export default async function MatchesPage() {
         hidden += 1;
       }
     }
-    cardData.set(match.id, { predictions: visible, hiddenPredictionCount: hidden });
+    const bestPredictions: BestPredictionPreview[] =
+      match.status === "FINISHED"
+        ? getBestPredictions(
+            match.predictions.map((p) => ({
+              id: p.id,
+              displayName: p.participant.displayName,
+              predHomeScore: p.predHomeScore,
+              predAwayScore: p.predAwayScore,
+              predBestPlayerName: p.predBestPlayerName,
+              predFirstScorerName: p.predFirstScorerName,
+              pointsTotal: p.pointsTotal,
+              createdAt: p.createdAt,
+              isMine: participant?.id === p.participantId,
+              rankLabel: "🏆",
+            }))
+          )
+        : [];
+    cardData.set(match.id, { predictions: visible, bestPredictions, hiddenPredictionCount: hidden, hasMyPrediction });
   }
 
   const now = new Date();
