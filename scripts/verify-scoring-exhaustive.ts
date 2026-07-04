@@ -17,10 +17,17 @@ function referenceNormalScorePoints(resultHome: number, resultAway: number, pred
   return Math.abs(predHome - resultHome) + Math.abs(predAway - resultAway) === 1 ? 2 : 1;
 }
 
-function referencePenaltyScorePoints(penaltyWinnerIsHome: boolean, predHome: number, predAway: number): number {
+function referencePenaltyScorePoints(
+  tiedScore: number,
+  penaltyWinnerIsHome: boolean,
+  predHome: number,
+  predAway: number
+): number {
   const predicted = outcomeOf(predHome, predAway);
   const advancing = penaltyWinnerIsHome ? "HOME_WIN" : "AWAY_WIN";
-  if (predicted === advancing) return 2;
+  if (predicted === advancing) {
+    return Math.abs(predHome - tiedScore) + Math.abs(predAway - tiedScore) === 1 ? 2 : 1;
+  }
   if (predicted === "DRAW") return 1;
   return 0;
 }
@@ -53,7 +60,7 @@ for (const penaltyWinnerIsHome of [true, false]) {
   for (let tiedScore = 0; tiedScore <= maxScore; tiedScore += 1) {
     for (let predHome = 0; predHome <= maxScore; predHome += 1) {
       for (let predAway = 0; predAway <= maxScore; predAway += 1) {
-        const expected = referencePenaltyScorePoints(penaltyWinnerIsHome, predHome, predAway);
+        const expected = referencePenaltyScorePoints(tiedScore, penaltyWinnerIsHome, predHome, predAway);
         const actual = scoreOutcomePoints(
           result(tiedScore, tiedScore, { wentToPenalties: true, penaltyWinnerIsHome }),
           pred(predHome, predAway)

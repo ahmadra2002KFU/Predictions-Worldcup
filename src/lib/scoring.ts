@@ -49,7 +49,10 @@ export function scoreOutcomePoints(result: MatchResult, pred: PredictionInput): 
     }
 
     const advancing: Outcome = result.penaltyWinnerIsHome ? "HOME_WIN" : "AWAY_WIN";
-    if (predicted === advancing) return 2; // correctly called who advances
+    if (predicted === advancing) {
+      const totalScorelineDiff = Math.abs(pred.predHomeScore - result.homeScore) + Math.abs(pred.predAwayScore - result.awayScore);
+      return totalScorelineDiff === 1 ? 2 : 1; // advanced team + one-goal scoreline miss gets 2; broader misses get 1
+    }
     if (predicted === "DRAW") return 1; // correctly read it as level, didn't call the winner
     return 0; // picked the team that got eliminated
   }

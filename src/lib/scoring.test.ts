@@ -30,10 +30,18 @@ function referenceNormalScorePoints(resultHome: number, resultAway: number, pred
   return totalScorelineMiss === 1 ? 2 : 1;
 }
 
-function referencePenaltyScorePoints(penaltyWinnerIsHome: boolean, predHome: number, predAway: number): number {
+function referencePenaltyScorePoints(
+  tiedScore: number,
+  penaltyWinnerIsHome: boolean,
+  predHome: number,
+  predAway: number
+): number {
   const predicted = outcomeOf(predHome, predAway);
   const advancing = penaltyWinnerIsHome ? "HOME_WIN" : "AWAY_WIN";
-  if (predicted === advancing) return 2;
+  if (predicted === advancing) {
+    const totalScorelineMiss = Math.abs(predHome - tiedScore) + Math.abs(predAway - tiedScore);
+    return totalScorelineMiss === 1 ? 2 : 1;
+  }
   if (predicted === "DRAW") return 1;
   return 0;
 }
@@ -112,12 +120,17 @@ describe("scoreOutcomePoints — knockout matches decided by penalties", () => {
   const penaltyResult = (penaltyWinnerIsHome: boolean) =>
     result(1, 1, { wentToPenalties: true, penaltyWinnerIsHome });
 
-  it("correctly predicted the advancing (home) team = 2 points", () => {
-    expect(scoreOutcomePoints(penaltyResult(true), pred(2, 0))).toBe(2);
+  it("correctly predicted the advancing (home) team by one goal = 2 points", () => {
+    expect(scoreOutcomePoints(penaltyResult(true), pred(2, 1))).toBe(2);
   });
 
-  it("correctly predicted the advancing (away) team = 2 points", () => {
-    expect(scoreOutcomePoints(penaltyResult(false), pred(0, 2))).toBe(2);
+  it("correctly predicted the advancing (away) team by one goal = 2 points", () => {
+    expect(scoreOutcomePoints(penaltyResult(false), pred(1, 2))).toBe(2);
+  });
+
+  it("correctly predicted the advancing team by more than one goal = 1 point", () => {
+    expect(scoreOutcomePoints(penaltyResult(true), pred(3, 1))).toBe(1);
+    expect(scoreOutcomePoints(penaltyResult(false), pred(0, 2))).toBe(1);
   });
 
   it("predicted a draw = 1 point", () => {
@@ -157,7 +170,7 @@ describe("scoreOutcomePoints — knockout matches decided by penalties", () => {
                 result(tiedScore, tiedScore, { wentToPenalties: true, penaltyWinnerIsHome }),
                 pred(predHome, predAway)
               )
-            ).toBe(referencePenaltyScorePoints(penaltyWinnerIsHome, predHome, predAway));
+            ).toBe(referencePenaltyScorePoints(tiedScore, penaltyWinnerIsHome, predHome, predAway));
           }
         }
       }
